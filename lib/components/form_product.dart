@@ -17,11 +17,24 @@ class _FormProductState extends State<FormProduct> {
 
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
+      final double? preco = double.tryParse(_precoController.text);
+
+      if (preco == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('Preço inválido. Por favor, insira um número válido.')),
+        );
+        return;
+      }
+
       widget.onSubmit({
-        'nome': _nomeController.text,
-        'descricao': _descricaoController.text,
-        'preco': double.parse(_precoController.text),
+        'name': _nomeController.text,
+        'description': _descricaoController.text,
+        'price': preco,
+        'updateDate': DateTime.now().toIso8601String(),
       });
+
       _nomeController.clear();
       _descricaoController.clear();
       _precoController.clear();
@@ -38,21 +51,24 @@ class _FormProductState extends State<FormProduct> {
           children: [
             TextFormField(
               controller: _nomeController,
-              decoration: const InputDecoration(labelText: 'Nome do Produto'),
-              validator: (value) => value!.isEmpty ? 'Insira o nome' : null,
+              decoration: const InputDecoration(labelText: 'Nome'),
+              validator: (value) =>
+                  value!.isEmpty ? 'O nome não pode estar vazio' : null,
             ),
             TextFormField(
               controller: _descricaoController,
               decoration: const InputDecoration(labelText: 'Descrição'),
               validator: (value) =>
-                  value!.isEmpty ? 'Insira a descrição' : null,
+                  value!.isEmpty ? 'A descrição não pode estar vazia' : null,
             ),
             TextFormField(
               controller: _precoController,
               decoration: const InputDecoration(labelText: 'Preço'),
               keyboardType: TextInputType.number,
-              validator: (value) => value!.isEmpty ? 'Insira o preço' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'O preço não pode estar vazio' : null,
             ),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _handleSubmit,
               child: const Text('Adicionar Produto'),
