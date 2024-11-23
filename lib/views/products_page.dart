@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart'; // Importe o pacote intl
+import 'package:work_frontend/components/product_item.dart';
 import '../components/form_product.dart';
-import '../components/list_tile_item.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -108,13 +108,11 @@ class _ProductsPageState extends State<ProductsPage> {
               itemCount: _products.length,
               itemBuilder: (context, index) {
                 final product = _products[index];
-                return ListTileItem(
-                  title: product['name'],
-                  description: product['description'],
-                  subtitle: "R\$ ${product['price']}",
-                  onDelete: () => _deleteProduct(
-                      product['id']), // Passa o ID para exclusão.
-                );
+                return ProductItem(
+                    description: product['description'],
+                    name: product['name'],
+                    price: product['price'],
+                    onDelete: () => _deleteProduct(product['id']));
               },
             ),
           ),

@@ -15,23 +15,21 @@ class _FormProductState extends State<FormProduct> {
   final _descricaoController = TextEditingController();
   final _precoController = TextEditingController();
 
+  // Validação de preço
+  String? _validatePrice(String? value) {
+    final double? price = double.tryParse(value ?? '');
+    if (price == null || price <= 0 || price >= 120) {
+      return 'Preço deve ser um número positivo menor que 120';
+    }
+    return null;
+  }
+
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
-      final double? preco = double.tryParse(_precoController.text);
-
-      if (preco == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content:
-                  Text('Preço inválido. Por favor, insira um número válido.')),
-        );
-        return;
-      }
-
       widget.onSubmit({
         'name': _nomeController.text,
         'description': _descricaoController.text,
-        'price': preco,
+        'price': double.parse(_precoController.text),
       });
 
       _nomeController.clear();
@@ -52,20 +50,23 @@ class _FormProductState extends State<FormProduct> {
               controller: _nomeController,
               decoration: const InputDecoration(labelText: 'Nome'),
               validator: (value) =>
-                  value!.isEmpty ? 'O nome não pode estar vazio' : null,
+                  value!.isEmpty || value.length < 3 || value.length > 25
+                      ? 'Deve ter entre 3 e 25 caracteres'
+                      : null,
             ),
             TextFormField(
               controller: _descricaoController,
               decoration: const InputDecoration(labelText: 'Descrição'),
               validator: (value) =>
-                  value!.isEmpty ? 'A descrição não pode estar vazia' : null,
+                  value!.isEmpty || value.length < 3 || value.length > 25
+                      ? 'Deve ter entre 3 e 25 caracteres'
+                      : null,
             ),
             TextFormField(
               controller: _precoController,
               decoration: const InputDecoration(labelText: 'Preço'),
               keyboardType: TextInputType.number,
-              validator: (value) =>
-                  value!.isEmpty ? 'O preço não pode estar vazio' : null,
+              validator: _validatePrice,
             ),
             const SizedBox(height: 10),
             ElevatedButton(

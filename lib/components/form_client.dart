@@ -16,27 +16,64 @@ class _FormClientState extends State<FormClient> {
   final _nomeController = TextEditingController();
   final _sobrenomeController = TextEditingController();
   final _emailController = TextEditingController();
-  final _idadeController =
-      TextEditingController(); // Adicionando o campo para idade
+  final _idadeController = TextEditingController();
+  final _fotoController = TextEditingController(); // Novo controlador para foto
+
+  // Validação de email
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Insira o email';
+    }
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Insira um email válido';
+    }
+    return null;
+  }
+
+  // Validação de nome e sobrenome
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'O campo não pode estar vazio';
+    }
+    if (value.length < 3 || value.length > 25) {
+      return 'Deve ter entre 3 e 25 caracteres';
+    }
+    return null;
+  }
+
+  // Validação de idade
+  String? _validateAge(String? value) {
+    final int? age = int.tryParse(value ?? '');
+    if (age == null || age <= 0 || age >= 120) {
+      return 'Idade deve ser um número positivo menor que 120';
+    }
+    return null;
+  }
+
+  // Validação de URL da foto
+  String? _validatePhoto(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Insira a URL da foto';
+    }
+    final urlRegex = RegExp(
+        r'^(http(s)?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$');
+    if (!urlRegex.hasMatch(value)) {
+      return 'Insira uma URL válida';
+    }
+    return null;
+  }
 
   void _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
-      // Pegando os valores do formulário
-      final nome = _nomeController.text;
-      final sobrenome = _sobrenomeController.text;
-      final email = _emailController.text;
-      final idade = int.tryParse(_idadeController.text) ??
-          0; // Garantindo que a idade seja um número
-
-      // Criando o corpo da requisição
       final clientData = {
-        'nome': nome,
-        'sobrenome': sobrenome,
-        'email': email,
-        'idade': idade,
+        'nome': _nomeController.text,
+        'sobrenome': _sobrenomeController.text,
+        'email': _emailController.text,
+        'idade': int.parse(_idadeController.text),
+        'foto': _fotoController.text, // Adiciona o campo foto
       };
 
-      // Fazendo a requisição POST para a API
       final response = await http.post(
         Uri.parse('http://localhost:3355/api/clients'),
         headers: {'Content-Type': 'application/json'},
@@ -44,16 +81,13 @@ class _FormClientState extends State<FormClient> {
       );
 
       if (response.statusCode == 200) {
-        // Caso a requisição seja bem-sucedida, chame a função onSubmit
         widget.onSubmit(clientData);
-
-        // Limpar os campos após o envio
         _nomeController.clear();
         _sobrenomeController.clear();
         _emailController.clear();
         _idadeController.clear();
+        _fotoController.clear(); // Limpa o campo foto
       } else {
-        // Caso haja erro na requisição
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Erro ao adicionar cliente.')),
         );
@@ -72,24 +106,28 @@ class _FormClientState extends State<FormClient> {
             TextFormField(
               controller: _nomeController,
               decoration: const InputDecoration(labelText: 'Nome'),
-              validator: (value) => value!.isEmpty ? 'Insira o nome' : null,
+              validator: _validateName,
             ),
             TextFormField(
               controller: _sobrenomeController,
               decoration: const InputDecoration(labelText: 'Sobrenome'),
-              validator: (value) =>
-                  value!.isEmpty ? 'Insira o sobrenome' : null,
+              validator: _validateName,
             ),
             TextFormField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
-              validator: (value) => value!.isEmpty ? 'Insira o email' : null,
+              validator: _validateEmail,
             ),
             TextFormField(
               controller: _idadeController,
               decoration: const InputDecoration(labelText: 'Idade'),
               keyboardType: TextInputType.number,
-              validator: (value) => value!.isEmpty ? 'Insira a idade' : null,
+              validator: _validateAge,
+            ),
+            TextFormField(
+              controller: _fotoController,
+              decoration: const InputDecoration(labelText: 'URL da Foto'),
+              validator: _validatePhoto,
             ),
             ElevatedButton(
               onPressed: _handleSubmit,

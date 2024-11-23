@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../components/form_client.dart';
-import '../components/list_tile_item.dart';
+import '../components/client_item.dart'; // Alteração aqui para o novo componente
 
 class ClientsPage extends StatefulWidget {
   const ClientsPage({super.key});
@@ -75,11 +75,14 @@ class _ClientsPageState extends State<ClientsPage> {
             child: ListView.builder(
               itemCount: _clients.length,
               itemBuilder: (context, index) {
-                return ListTileItem(
-                  description: "Idade: ${_clients[index]['age']}",
+                return ClientItem(
+                  // Substituição do ListTileItem por ClientItem
+                  description: "Idade: ${_clients[index]['description']}",
+                  age: _clients[index]['age'],
                   title:
                       "${_clients[index]['nome']} ${_clients[index]['sobrenome']}",
                   subtitle: _clients[index]['email'],
+                  photoUrl: _clients[index]['photo'], // Passando a URL da foto
                   onDelete: () => _removeClient(index),
                 );
               },
