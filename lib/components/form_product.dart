@@ -32,7 +32,6 @@ class _FormProductState extends State<FormProduct> {
         'name': _nomeController.text,
         'description': _descricaoController.text,
         'price': preco,
-        'updateDate': DateTime.now().toIso8601String(),
       });
 
       _nomeController.clear();
