@@ -32,9 +32,17 @@ class _FormProductState extends State<FormProduct> {
         'price': double.parse(_precoController.text),
       });
 
-      _nomeController.clear();
-      _descricaoController.clear();
-      _precoController.clear();
+      // Resetando os campos após o submit
+      setState(() {
+        _nomeController.clear();
+        _descricaoController.clear();
+        _precoController.clear();
+      });
+
+      // Dando um refresh na página (pode ser a navegação ou outra ação)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Produto adicionado com sucesso!')),
+      );
     }
   }
 
@@ -46,32 +54,68 @@ class _FormProductState extends State<FormProduct> {
         key: _formKey,
         child: Column(
           children: [
-            TextFormField(
-              controller: _nomeController,
-              decoration: const InputDecoration(labelText: 'Nome'),
-              validator: (value) =>
-                  value!.isEmpty || value.length < 3 || value.length > 25
-                      ? 'Deve ter entre 3 e 25 caracteres'
-                      : null,
+            // Nome e Preço lado a lado
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _nomeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                    ),
+                    validator: (value) =>
+                        value!.isEmpty || value.length < 3 || value.length > 25
+                            ? 'Deve ter entre 3 e 25 caracteres'
+                            : null,
+                    style: TextStyle(fontSize: 12.0),
+                  ),
+                ),
+                SizedBox(width: 8.0),
+                Expanded(
+                  child: TextFormField(
+                    controller: _precoController,
+                    decoration: const InputDecoration(
+                      labelText: 'Preço',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: _validatePrice,
+                    style: TextStyle(fontSize: 12.0),
+                  ),
+                ),
+              ],
             ),
+            SizedBox(height: 8.0),
+            // Descrição embaixo
             TextFormField(
               controller: _descricaoController,
-              decoration: const InputDecoration(labelText: 'Descrição'),
+              decoration: const InputDecoration(
+                labelText: 'Descrição',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+              ),
               validator: (value) =>
                   value!.isEmpty || value.length < 3 || value.length > 25
                       ? 'Deve ter entre 3 e 25 caracteres'
                       : null,
-            ),
-            TextFormField(
-              controller: _precoController,
-              decoration: const InputDecoration(labelText: 'Preço'),
-              keyboardType: TextInputType.number,
-              validator: _validatePrice,
+              style: TextStyle(fontSize: 12.0),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _handleSubmit,
               child: const Text('Adicionar Produto'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                textStyle: const TextStyle(fontSize: 14.0),
+                minimumSize: Size(180, 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0),
+                ),
+              ),
             ),
           ],
         ),

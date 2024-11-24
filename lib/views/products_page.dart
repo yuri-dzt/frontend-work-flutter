@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart'; // Importe o pacote intl
+import 'package:intl/intl.dart';
 import 'package:work_frontend/components/product_item.dart';
 import '../components/form_product.dart';
 
@@ -54,7 +54,7 @@ class _ProductsPageState extends State<ProductsPage> {
         body: jsonEncode({'id': id}),
       );
       if (response.statusCode == 200) {
-        _fetchProducts(); // Atualiza a lista de produtos após a exclusão.
+        _fetchProducts();
       } else {
         _showError('Erro ao excluir produto: ${response.statusCode}');
       }
@@ -64,7 +64,6 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   Future<void> _addProduct(Map<String, dynamic> product) async {
-    // Obter a data e hora atual e formatá-la para o formato desejado
     String formattedDate =
         DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
@@ -76,11 +75,25 @@ class _ProductsPageState extends State<ProductsPage> {
           'name': product['name'],
           'description': product['description'],
           'price': product['price'],
-          'updateDate': formattedDate, // Passa a data formatada
+          'updateDate': formattedDate,
         }),
       );
-      if (response.statusCode == 201) {
-        _fetchProducts(); // Atualiza a lista de produtos após a criação.
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Adicionando o produto à lista localmente antes de buscar de novo
+        setState(() {
+          _products.add({
+            'id': jsonDecode(response.body)[
+                'id'], // Supondo que o ID seja retornado após o post
+            'name': product['name'],
+            'description': product['description'],
+            'price': product['price'],
+            'updateDate': formattedDate,
+          });
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Produto adicionado com sucesso!')),
+        );
       } else {
         _showError('Erro ao adicionar produto: ${response.statusCode}');
       }
@@ -104,22 +117,31 @@ class _ProductsPageState extends State<ProductsPage> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: _products.length,
-              itemBuilder: (context, index) {
-                final product = _products[index];
-                return ProductItem(
-                    description: product['description'],
-                    name: product['name'],
-                    price: product['price'],
-                    onDelete: () => _deleteProduct(product['id']));
-              },
-            ),
+            child: _products.isEmpty
+                ? Center(
+                    child: const Text(
+                      'Nenhum produto registrado',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _products.length,
+                    itemBuilder: (context, index) {
+                      final product = _products[index];
+                      return ProductItem(
+                        description: product['description'],
+                        name: product['name'],
+                        price: product['price'],
+                        onDelete: () => _deleteProduct(product['id']),
+                        onEdit: (value) => print(value),
+                      );
+                    },
+                  ),
           ),
           FormProduct(
             onSubmit: (product) async {
-              await _addProduct(
-                  product); // Chama a função para adicionar o produto.
+              await _addProduct(product);
             },
           ),
         ],
