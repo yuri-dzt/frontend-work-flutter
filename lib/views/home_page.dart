@@ -10,6 +10,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Página Inicial'),
+        foregroundColor: Colors.white,
         backgroundColor:
             Colors.teal, // Cor personalizada para a barra de navegação
         centerTitle: true,
